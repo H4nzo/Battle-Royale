@@ -2,31 +2,72 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using TMPro;
 
-public class Launcher : MonoBehaviourPunCallbacks
+namespace Hanzo
 {
-    // Start is called before the first frame update
-    void Start()
+    public class Launcher : MonoBehaviourPunCallbacks
     {
-         Debug.Log("Connected to Photon Network");
-        PhotonNetwork.ConnectUsingSettings();
-    }
+        [SerializeField] TMP_InputField roomNameInputfield;
+        [SerializeField] TMP_Text errorText;
+        [SerializeField] TMP_Text roomNameText;
 
-    public override void OnConnectedToMaster()
-    {
-        Debug.Log("Joined Master");
-        PhotonNetwork.JoinLobby();
-    }
+        // Start is called before the first frame update
+        void Start()
+        {
+            Debug.Log("Connected to Photon Network");
+            PhotonNetwork.ConnectUsingSettings();
+        }
 
-    public override void OnJoinedLobby()
-    {
+        public override void OnConnectedToMaster()
+        {
+            Debug.Log("Joined Master");
+            PhotonNetwork.JoinLobby();
+        }
 
-        Debug.Log("Joined Lobby");
-    }
+        public override void OnJoinedLobby()
+        {
+            MenuManager.Instance.OpenMenu("title");
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+            Debug.Log("Joined Lobby");
+        }
+
+        public void CreateRoom()
+        {
+            if (string.IsNullOrEmpty(roomNameInputfield.text)) return;
+            PhotonNetwork.CreateRoom(roomNameInputfield.text);
+            MenuManager.Instance.OpenMenu("loading");
+        }
+        public override void OnJoinedRoom()
+        {
+            MenuManager.Instance.OpenMenu("room");
+            roomNameText.text = PhotonNetwork.CurrentRoom.Name;
+        }
+
+        public override void OnCreateRoomFailed(short returnCode, string message)
+        {
+            errorText.text = "Room Creation Failed: " + message;
+            MenuManager.Instance.OpenMenu("error");
+        }
+
+        public void LeaveRoom()
+        {
+                PhotonNetwork.LeaveRoom();
+        }
+
+        public override void OnLeftRoom()
+        {
+           MenuManager.Instance.OpenMenu("title");
+        }
+
+
+
+
+
+
+
+
+
     }
 }
+
