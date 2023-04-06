@@ -17,9 +17,12 @@ namespace Hanzo
 
         public Transform roomListContent;
         public Transform playerListContent;
-        
+
         public GameObject roomListItemPrefab;
         public GameObject PlayerListItemPrefab;
+
+        [SerializeField] GameObject startGameButton;
+
 
 
         private void Awake()
@@ -38,13 +41,14 @@ namespace Hanzo
         {
             Debug.Log("Joined Master");
             PhotonNetwork.JoinLobby();
+            PhotonNetwork.AutomaticallySyncScene = true;
         }
 
         public override void OnJoinedLobby()
         {
             MenuManager.Instance.OpenMenu("title");
-
             Debug.Log("Joined Lobby");
+            PhotonNetwork.NickName = "Player " + Random.Range(0, 100).ToString("0000");
         }
 
         public void CreateRoom()
@@ -57,6 +61,25 @@ namespace Hanzo
         {
             MenuManager.Instance.OpenMenu("room");
             roomNameText.text = PhotonNetwork.CurrentRoom.Name;
+
+            Player[] players = PhotonNetwork.PlayerList;
+
+            for (int i = 0; i < players.Length; i++)
+            {
+                Instantiate(PlayerListItemPrefab, playerListContent).GetComponent<PlayerListItem>().SetUp(players[i]);
+            }
+
+            startGameButton.SetActive(PhotonNetwork.IsMasterClient);
+        }
+
+        public override void OnMasterClientSwitched(Player newMasterClient)
+        {
+            startGameButton.SetActive(PhotonNetwork.IsMasterClient);
+        }
+
+        public void StartGame()
+        {
+            PhotonNetwork.LoadLevel(1);
         }
 
         public override void OnCreateRoomFailed(short returnCode, string message)
@@ -79,6 +102,7 @@ namespace Hanzo
         {
             PhotonNetwork.JoinRoom(info.Name);
             MenuManager.Instance.OpenMenu("loading");
+
         }
 
         public override void OnRoomListUpdate(List<RoomInfo> roomList)
@@ -93,7 +117,8 @@ namespace Hanzo
             }
         }
 
-        public override void OnPlayerEnteredRoom(Player newPlayer){
+        public override void OnPlayerEnteredRoom(Player newPlayer)
+        {
             Instantiate(PlayerListItemPrefab, playerListContent).GetComponent<PlayerListItem>().SetUp(newPlayer);
         }
 
