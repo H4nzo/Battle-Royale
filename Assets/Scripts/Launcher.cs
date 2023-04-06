@@ -15,8 +15,12 @@ namespace Hanzo
         [SerializeField] TMP_Text errorText;
         [SerializeField] TMP_Text roomNameText;
 
-        public Transform roomListBG;
-        public GameObject roomListPrefab;
+        public Transform roomListContent;
+        public Transform playerListContent;
+        
+        public GameObject roomListItemPrefab;
+        public GameObject PlayerListItemPrefab;
+
 
         private void Awake()
         {
@@ -79,10 +83,18 @@ namespace Hanzo
 
         public override void OnRoomListUpdate(List<RoomInfo> roomList)
         {
+            foreach (Transform trans in roomListContent)
+            {
+                Destroy(trans.gameObject);
+            }
             for (int i = 0; i < roomList.Count; i++)
             {
-                Instantiate(roomListPrefab, roomListBG).GetComponent<RoomListItem>().Setup(roomList[i]);
+                Instantiate(roomListItemPrefab, roomListContent).GetComponent<RoomListItem>().Setup(roomList[i]);
             }
+        }
+
+        public override void OnPlayerEnteredRoom(Player newPlayer){
+            Instantiate(PlayerListItemPrefab, playerListContent).GetComponent<PlayerListItem>().SetUp(newPlayer);
         }
 
 
