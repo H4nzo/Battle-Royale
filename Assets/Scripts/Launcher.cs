@@ -64,6 +64,11 @@ namespace Hanzo
 
             Player[] players = PhotonNetwork.PlayerList;
 
+            foreach (Transform child in playerListContent)
+            {
+                Destroy(child.gameObject);
+            }
+
             for (int i = 0; i < players.Length; i++)
             {
                 Instantiate(PlayerListItemPrefab, playerListContent).GetComponent<PlayerListItem>().SetUp(players[i]);
@@ -113,6 +118,9 @@ namespace Hanzo
             }
             for (int i = 0; i < roomList.Count; i++)
             {
+                if (roomList[i].RemovedFromList)
+                    continue;
+                    
                 Instantiate(roomListItemPrefab, roomListContent).GetComponent<RoomListItem>().Setup(roomList[i]);
             }
         }

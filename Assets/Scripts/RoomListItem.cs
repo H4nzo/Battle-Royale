@@ -10,11 +10,18 @@ namespace Hanzo
     {
         [SerializeField] TMP_Text text;
 
-        RoomInfo info;
+        private RoomInfo info;
+
+        public RoomInfo Info
+        {
+            get { return info; }
+            set { info = value; }
+        }
+        
 
         public void Setup(RoomInfo _info)
         {
-            info = _info;
+            Info = _info;
             text.text = _info.Name;
 
         }
