@@ -48,7 +48,7 @@ namespace Hanzo
         {
             MenuManager.Instance.OpenMenu("title");
             Debug.Log("Joined Lobby");
-            PhotonNetwork.NickName = "Player " + Random.Range(0, 100).ToString("0000");
+            // PhotonNetwork.NickName = "Player " + Random.Range(0, 100).ToString("0000");
         }
 
         public void CreateRoom()

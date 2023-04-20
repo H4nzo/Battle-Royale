@@ -10,10 +10,9 @@ namespace Hanzo
     {
         PhotonView PV;
 
-        private void Awake()
-        {
-            PV = GetComponent<PhotonView>();
-        }
+        GameObject controller;
+
+        
         // Start is called before the first frame update
         void Start()
         {
@@ -30,9 +29,15 @@ namespace Hanzo
         void CreateController()
         {
             //Instantiate player controller
-            PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "PlayerController"), Vector3.zero, Quaternion.identity);
+            Transform spawnpoint = SpawnManager.Instance.GetSpawnpoint();
+            controller = PhotonNetwork.Instantiate(Path.Combine("PhotonPrefabs", "PlayerController"), spawnpoint.position, spawnpoint.rotation, 0, new object[]{PV.ViewID});
             Debug.Log("Instantiated Player Controller");
 
+        }
+
+        public void Die(){
+            PhotonNetwork.Destroy(controller);
+            CreateController();
         }
 
 

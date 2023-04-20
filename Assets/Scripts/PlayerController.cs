@@ -6,7 +6,7 @@ using Hanzo;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using Photon.Realtime;
 
-public class PlayerController : MonoBehaviourPunCallbacks
+public class PlayerController : MonoBehaviourPunCallbacks, IDamageable
 {
     [SerializeField] GameObject cameraHolder;
 
@@ -27,12 +27,19 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     PhotonView PV;
 
+    const float maxHealth = 100f;
+    float currentHealth = maxHealth;
+
+    PlayerManager playerManager;
+
 
     // Start is called before the first frame update
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         PV = GetComponent<PhotonView>();
+
+        playerManager = PhotonView.Find((int)PV.InstantiationData[0]).GetComponent<PlayerManager>(); 
     }
 
     void Start()
@@ -93,8 +100,11 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
         }
 
-        if(Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0))
             items[itemIndex].Use();
+
+        if(transform.position.y < -10f)
+            Die();
 
     }
 
@@ -151,15 +161,16 @@ public class PlayerController : MonoBehaviourPunCallbacks
         {
             Hashtable hash = new Hashtable();
             hash.Add("itemIndex", itemIndex);
-            PhotonNetwork.LocalPlayer.SetCustomProperties(hash); 
-            
+            PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
+
         }
 
     }
 
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
     {
-        if(!PV.IsMine && targetPlayer == PV.Owner){
+        if (!PV.IsMine && targetPlayer == PV.Owner)
+        {
             EquipItem((int)changedProps["itemIndex"]);
         }
     }
@@ -174,6 +185,31 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
         rb.MovePosition(rb.position + transform.TransformDirection(moveAmount) * Time.deltaTime);
 
+    }
+
+    public void TakeDamage(float damage)
+    {
+        PV.RPC("RPC_TakeDamage", RpcTarget.All, damage);
+    }
+
+    [PunRPC]
+    void RPC_TakeDamage(float damage)
+    {
+        if (!PV.IsMine)
+            return;
+
+        Debug.Log("Took Damage: " + damage);
+        currentHealth -= damage;
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+
+    }
+
+    void Die(){
+        playerManager.Die();
     }
 
 
